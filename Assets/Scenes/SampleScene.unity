@@ -104,7 +104,7 @@ NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -117,7 +117,7 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -436,9 +436,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -715,7 +723,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -749,13 +759,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31ca83f2d8a701e43801b518ccef5d03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _model: 1
-  _maxTokens: 3072
-  _temperature: 0.9
+  _model: 
   _chatbotName: Manuel
-  _initialPrompt: "Te llamas Manuel. Eres una apasionado de las nuevas tecnolog\xEDas.
-    Te encanta la inteligencia artificial. Eres fan del Real Betis. Te gusta mucho
-    el rock, expecialmete Extremoduro."
+  _initialPrompt: Your name is Manuel. You are passionate about new technologies.
+    You love artificial intelligence. You are a fan of Real Betis. You really like
+    rock music, especially Extremoduro.
   chatGPTResponse:
     m_PersistentCalls:
       m_Calls: []
@@ -786,20 +794,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75206c18ee781ff4cb742ac320f99efe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enabled: 0
-  personaje: 12
-  pelicula: 2
+  personalityEnabled: 0
+  character: 11
+  movie: 2
   conversation: {fileID: 1454721085}
-  prompt: "Quiero que act\xFAes como #Personality# de #Film#. Quiero que respondas
-    y respondas como #Personality# usando el tono, la manera y el vocabulario que
-    #Personality# usar\xEDa. No escriba ninguna explicaci\xF3n. Solo responde como
-    #Personality#. Debes conocer todo el conocimiento de #Personality#"
-  selection: 1
+  customPrompt: You are #Personality# from #Film#. Respond in character.
 --- !u!1001 &1709341300
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1252044629}
     m_Modifications:
     - target: {fileID: 135588, guid: 4dd277bd9572488489906165e0931952, type: 3}
@@ -851,6 +856,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4dd277bd9572488489906165e0931952, type: 3}
 --- !u!4 &1709341301 stripped
 Transform:
@@ -1145,6 +1153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 1911834507}
+  model: gpt-4o-mini-tts
+  voice: alloy
+  speed: 1
 --- !u!4 &1911834509
 Transform:
   m_ObjectHideFlags: 0
@@ -1280,6 +1291,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1252044629}
     m_Modifications:
     - target: {fileID: 3480374950922610399, guid: 032ba5cd505ac2a4fb48e3c1692797de, type: 3}
@@ -1415,4 +1427,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 9100000, guid: b9265456b4d9bc04593468b0675411a8, type: 2}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6230850925876490339, guid: 032ba5cd505ac2a4fb48e3c1692797de, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1810965899}
   m_SourcePrefab: {fileID: 100100000, guid: 032ba5cd505ac2a4fb48e3c1692797de, type: 3}

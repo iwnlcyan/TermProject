@@ -1,15 +1,9 @@
-//
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
-//
-// <code>
 using UnityEngine;
-using UnityEngine.UI;
-using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Audio;
-using ChatGPTWrapper;
+using UnityEngine.Networking;
 using System;
-using UnityEngine.UIElements;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 
 public class STT : MonoBehaviour
 {
@@ -18,50 +12,168 @@ public class STT : MonoBehaviour
 
     bool isRecognizedSpeech_OK = false;
     bool isRecognizedSpeech_Error = false;
-    public async void ButtonClick()
+
+    private AudioClip recordedClip;
+    private bool isRecording = false;
+    private string microphoneDevice;
+
+    void Start()
     {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        var config = SpeechConfig.FromSubscription(Credentials.Azure_SubscriptionKey, Credentials.Azure_ServiceRegion);
-        var autoDetectSourceLanguageConfig =
-            AutoDetectSourceLanguageConfig.FromLanguages(
-                new string[] { "en-US", "de-DE", "es-ES" });
-        using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-        // Make sure to dispose the recognizer after use!
-        using (var recognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig, audioConfig))
+        // Get default microphone
+        if (Microphone.devices.Length > 0)
         {
-            // Starts speech recognition, and returns after a single utterance is recognized. The end of a
-            // single utterance is determined by listening for silence at the end or until a maximum of 15
-            // seconds of audio is processed.  The task returns the recognition text as result.
-            // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-            // shot recognition like command or query.
-            // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+            microphoneDevice = Microphone.devices[0];
+            Debug.Log($"Using microphone: {microphoneDevice}");
+        }
+        else
+        {
+            Debug.LogError("No microphone detected!");
+        }
+    }
 
-            var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+    public void ButtonClick()
+    {
+        if (!isRecording)
+        {
+            StartRecording();
+        }
+        else
+        {
+            StopRecording();
+        }
+    }
 
-            // Checks result.
-            string newMessage = string.Empty;
-            if (result.Reason == ResultReason.RecognizedSpeech)
-            {
-                newMessage = result.Text;
-                isRecognizedSpeech_OK = true;
-            }
-            else if (result.Reason == ResultReason.NoMatch)
-            {
-                newMessage = "NOMATCH: Speech could not be recognized.";
-                isRecognizedSpeech_Error = true;
-            }
-            else if (result.Reason == ResultReason.Canceled)
-            {
-                var cancellation = CancellationDetails.FromResult(result);
-                newMessage = $"CANCELED: Reason={cancellation.Reason} ErrorDetails={cancellation.ErrorDetails}";
-                isRecognizedSpeech_Error = true;
-            }
+    private void StartRecording()
+    {
+        if (string.IsNullOrEmpty(microphoneDevice))
+        {
+            SetError("No microphone available");
+            return;
+        }
 
-            lock (threadLocker)
+        isRecording = true;
+        // Record for up to 10 seconds at 16kHz (Whisper's preferred rate)
+        recordedClip = Microphone.Start(microphoneDevice, false, 10, 16000);
+        Debug.Log("Recording started...");
+    }
+
+    private void StopRecording()
+    {
+        if (!isRecording) return;
+
+        isRecording = false;
+        int position = Microphone.GetPosition(microphoneDevice);
+        Microphone.End(microphoneDevice);
+
+        // Trim the audio clip to actual recorded length
+        float[] samples = new float[position * recordedClip.channels];
+        recordedClip.GetData(samples, 0);
+
+        AudioClip trimmedClip = AudioClip.Create("TrimmedClip", position, recordedClip.channels, recordedClip.frequency, false);
+        trimmedClip.SetData(samples, 0);
+
+        Debug.Log("Recording stopped. Sending to OpenAI Whisper...");
+        StartCoroutine(SendToWhisper(trimmedClip));
+    }
+
+    private IEnumerator SendToWhisper(AudioClip clip)
+    {
+        // Convert AudioClip to WAV bytes
+        byte[] wavData = ConvertAudioClipToWav(clip);
+
+        // Create multipart form data
+        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        formData.Add(new MultipartFormFileSection("file", wavData, "audio.wav", "audio/wav"));
+        formData.Add(new MultipartFormDataSection("model", "whisper-1"));
+        formData.Add(new MultipartFormDataSection("language", "en")); // Change if needed
+
+        UnityWebRequest request = UnityWebRequest.Post("https://api.openai.com/v1/audio/transcriptions", formData);
+        request.SetRequestHeader("Authorization", $"Bearer {Credentials.OpenAI_ApiKey}");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string responseText = request.downloadHandler.text;
+            Debug.Log($"Whisper Response: {responseText}");
+
+            try
             {
-                message = newMessage;
+                WhisperResponse response = JsonUtility.FromJson<WhisperResponse>(responseText);
+                lock (threadLocker)
+                {
+                    message = response.text;
+                    isRecognizedSpeech_OK = true;
+                }
             }
+            catch (Exception e)
+            {
+                SetError($"Failed to parse response: {e.Message}");
+            }
+        }
+        else
+        {
+            SetError($"Whisper API Error: {request.error}\n{request.downloadHandler.text}");
+        }
+
+        request.Dispose();
+    }
+
+    private void SetError(string errorMessage)
+    {
+        lock (threadLocker)
+        {
+            message = errorMessage;
+            isRecognizedSpeech_Error = true;
+        }
+        Debug.LogError(errorMessage);
+    }
+
+    private byte[] ConvertAudioClipToWav(AudioClip clip)
+    {
+        float[] samples = new float[clip.samples * clip.channels];
+        clip.GetData(samples, 0);
+
+        Int16[] intData = new Int16[samples.Length];
+        Byte[] bytesData = new Byte[samples.Length * 2];
+
+        int rescaleFactor = 32767;
+
+        for (int i = 0; i < samples.Length; i++)
+        {
+            intData[i] = (short)(samples[i] * rescaleFactor);
+            Byte[] byteArr = BitConverter.GetBytes(intData[i]);
+            byteArr.CopyTo(bytesData, i * 2);
+        }
+
+        int subchunk1Size = 16;
+        int subchunk2Size = bytesData.Length;
+        int chunkSize = 4 + (8 + subchunk1Size) + (8 + subchunk2Size);
+
+        using (MemoryStream stream = new MemoryStream())
+        using (BinaryWriter writer = new BinaryWriter(stream))
+        {
+            // RIFF header
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("RIFF"));
+            writer.Write(chunkSize);
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("WAVE"));
+
+            // fmt subchunk
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("fmt "));
+            writer.Write(subchunk1Size);
+            writer.Write((ushort)1); // Audio format (1 = PCM)
+            writer.Write((ushort)clip.channels);
+            writer.Write(clip.frequency);
+            writer.Write(clip.frequency * clip.channels * 2); // Byte rate
+            writer.Write((ushort)(clip.channels * 2)); // Block align
+            writer.Write((ushort)16); // Bits per sample
+
+            // data subchunk
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("data"));
+            writer.Write(subchunk2Size);
+            writer.Write(bytesData);
+
+            return stream.ToArray();
         }
     }
 
@@ -77,5 +189,11 @@ public class STT : MonoBehaviour
             isRecognizedSpeech_Error = false;
             Manager._OnSSTResponse_ERROR(message);
         }
+    }
+
+    [System.Serializable]
+    private class WhisperResponse
+    {
+        public string text;
     }
 }
