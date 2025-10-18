@@ -1,118 +1,129 @@
-//
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
-//
-// <code>
 using System;
-using System.Threading;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using Microsoft.CognitiveServices.Speech;
-using ChatGPTWrapper;
-using Unity.VisualScripting;
+using UnityEngine.Networking;
 
 public class TTS : MonoBehaviour
 {
     public AudioSource audioSource;
 
-    // Replace with your own subscription key and service region (e.g., "westus").
-    //private const string SubscriptionKey = Credentials.Azure_SubscriptionKey;
-    //private const string Region = Credentials.Azure_ServiceRegion;
-
-    private const int SampleRate = 24000;
+    [Header("OpenAI TTS Settings")]
+    [Tooltip("TTS Model: gpt-4o-mini-tts (fast), tts-1 (legacy), tts-1-hd (high quality)")]
+    public string model = "gpt-4o-mini-tts";
+    
+    [Tooltip("Voice: alloy, ash, ballad, coral, echo, fable, onyx, nova, sage, shimmer, verse")]
+    public string voice = "alloy";
+    
+    [Tooltip("Speed: 0.25 to 4.0")]
+    [Range(0.25f, 4.0f)]
+    public float speed = 1.0f;
 
     private object threadLocker = new object();
     private bool audioSourceNeedStop;
-    //private string tts_message;
 
-    private SpeechConfig speechConfig;
-    private SpeechSynthesizer synthesizer;
     public void PlayText(string _text)
     {
-        string newMessage = null;
+        StartCoroutine(GenerateSpeech(_text));
+    }
+
+    private IEnumerator GenerateSpeech(string text)
+    {
         var startTime = DateTime.Now;
 
-        // Starts speech synthesis, and returns once the synthesis is started.
-        using (var result = synthesizer.StartSpeakingTextAsync(_text).Result)
+        // Create request body
+        TTSRequest requestBody = new TTSRequest
         {
-            // Native playback is not supported on Unity yet (currently only supported on Windows/Linux Desktop).
-            // Use the Unity API to play audio here as a short term solution.
-            // Native playback support will be added in the future release.
-            var audioDataStream = AudioDataStream.FromResult(result);
-            var isFirstAudioChunk = true;
-            var audioClip = AudioClip.Create(
-                "Speech",
-                SampleRate * 600, // Can speak 10mins audio as maximum
-                1,
-                SampleRate,
-                true,
-                (float[] audioChunk) =>
+            model = this.model,
+            input = text,
+            voice = this.voice,
+            speed = this.speed,
+            response_format = "mp3"
+        };
+
+        string jsonData = JsonUtility.ToJson(requestBody);
+        Debug.Log($"Sending TTS request: {jsonData}");
+
+        UnityWebRequest request = new UnityWebRequest("https://api.openai.com/v1/audio/speech", "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", $"Bearer {Credentials.OpenAI_ApiKey}");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            var endTime = DateTime.Now;
+            var latency = endTime.Subtract(startTime).TotalMilliseconds;
+            Debug.Log($"TTS succeeded! Latency: {latency} ms");
+
+            // Get audio data
+            byte[] audioData = request.downloadHandler.data;
+
+            // Convert MP3 to AudioClip
+            StartCoroutine(LoadAudioClip(audioData));
+        }
+        else
+        {
+            Debug.LogError($"TTS Error: {request.error}\n{request.downloadHandler.text}");
+        }
+
+        request.Dispose();
+    }
+
+    private IEnumerator LoadAudioClip(byte[] audioData)
+    {
+        // Save to temporary file
+        string tempPath = System.IO.Path.Combine(Application.temporaryCachePath, "tts_temp.mp3");
+        System.IO.File.WriteAllBytes(tempPath, audioData);
+
+        // Load using UnityWebRequest (supports MP3 on most platforms)
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file://" + tempPath, AudioType.MPEG))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                
+                if (clip != null)
                 {
-                    var chunkSize = audioChunk.Length;
-                    var audioChunkBytes = new byte[chunkSize * 2];
-                    var readBytes = audioDataStream.ReadData(audioChunkBytes);
-                    if (isFirstAudioChunk && readBytes > 0)
-                    {
-                        var endTime = DateTime.Now;
-                        var latency = endTime.Subtract(startTime).TotalMilliseconds;
-                        newMessage = $"Speech synthesis succeeded!\nLatency: {latency} ms.";
-                        isFirstAudioChunk = false;
-                    }
+                    audioSource.clip = clip;
+                    audioSource.Play();
+                    Debug.Log("Playing TTS audio...");
 
-                    for (int i = 0; i < chunkSize; ++i)
+                    // Wait for audio to finish
+                    yield return new WaitWhile(() => audioSource.isPlaying);
+                    
+                    lock (threadLocker)
                     {
-                        if (i < readBytes / 2)
-                        {
-                            audioChunk[i] = (short)(audioChunkBytes[i * 2 + 1] << 8 | audioChunkBytes[i * 2]) / 32768.0F;
-                        }
-                        else
-                        {
-                            audioChunk[i] = 0.0f;
-                        }
-                    }
-
-                    if (readBytes == 0)
-                    {
-                        Thread.Sleep(200); // Leave some time for the audioSource to finish playback
                         audioSourceNeedStop = true;
                     }
-                });
-
-            audioSource.clip = audioClip;
-            audioSource.Play();
-        }
-
-        lock (threadLocker)
-        {
-            if (newMessage != null)
-            {
-                Debug.Log(newMessage);
+                }
+                else
+                {
+                    Debug.LogError("Failed to create AudioClip from MP3 data");
+                }
             }
-
+            else
+            {
+                Debug.LogError($"Failed to load audio: {www.error}");
+            }
         }
-    }
-    void Start()
-    {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        speechConfig = SpeechConfig.FromSubscription(Credentials.Azure_SubscriptionKey, Credentials.Azure_ServiceRegion);
-        speechConfig.SpeechSynthesisLanguage = "es-ES";
-        speechConfig.SpeechSynthesisVoiceName = "es-ES-AlvaroNeural";
-        //speechConfig.SpeechSynthesisVoiceName = "es-ES-ElviraNeural";
 
-        // The default format is RIFF, which has a riff header.
-        // We are playing the audio in memory as audio clip, which doesn't require riff header.
-        // So we need to set the format to raw (24KHz for better quality).
-        speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
-
-        // Creates a speech synthesizer.
-        // Make sure to dispose the synthesizer after use!
-        synthesizer = new SpeechSynthesizer(speechConfig, null);
-
-        synthesizer.SynthesisCanceled += (s, e) =>
+        // Clean up temp file
+        try
         {
-            var cancellation = SpeechSynthesisCancellationDetails.FromResult(e.Result);
-            Debug.LogError($"CANCELED:\nReason=[{cancellation.Reason}]\nErrorDetails=[{cancellation.ErrorDetails}]\nDid you update the subscription info?");
-        };
+            if (System.IO.File.Exists(tempPath))
+            {
+                System.IO.File.Delete(tempPath);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Failed to delete temp file: {e.Message}");
+        }
     }
 
     void Update()
@@ -129,9 +140,20 @@ public class TTS : MonoBehaviour
 
     void OnDestroy()
     {
-        if (synthesizer != null)
+        // Cleanup if needed
+        if (audioSource != null && audioSource.isPlaying)
         {
-            synthesizer.Dispose();
+            audioSource.Stop();
         }
+    }
+
+    [System.Serializable]
+    private class TTSRequest
+    {
+        public string model;
+        public string input;
+        public string voice;
+        public float speed;
+        public string response_format;
     }
 }

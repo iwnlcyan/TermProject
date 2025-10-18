@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Events;
 using System;
+using Newtonsoft.Json;
 
 namespace ChatGPTWrapper {
 
@@ -11,20 +12,17 @@ namespace ChatGPTWrapper {
         //[SerializeField]
         //private string _apiKey = null;
 
-        enum Model {
-            ChatGPT,
-            Davinci,
-            Curie
+        public enum AIModel
+        {
+            gpt_5_nano_2025_08_07
         }
+
+        [Header("Model Settings")]
         [SerializeField]
-        private Model _model = Model.Davinci;
-        private string _selectedModel = null;
-        [SerializeField]
-        private int _maxTokens = 3072;
-        [SerializeField]
-        private float _temperature = 0.6f;
+        private AIModel _selectedAIModel = AIModel.gpt_5_nano_2025_08_07;
+        private string _model;
         
-        private string _uri = "https://api.openai.com/v1/completions";
+        private string _uri = "https://api.openai.com/v1/responses";
         private List<(string, string)> _reqHeaders;
         
 
@@ -39,58 +37,90 @@ namespace ChatGPTWrapper {
 
         [TextArea(4,6)]
         [SerializeField]
-        public string _initialPrompt;
+        public string _initialPrompt = "You are a helpful AI assistant.";
 
         [Space(15)]
         public UnityStringEvent chatGPTResponse = new UnityStringEvent();
 
         private void Start()
         {
+            // Set model based on selection
+            switch (_selectedAIModel)
+            {
+                case AIModel.gpt_5_nano_2025_08_07:
+                    _model = "gpt-5-nano-2025-08-07";
+                    break;
+            }
+
+            // Ensure we have a default English prompt if empty
+            if (string.IsNullOrEmpty(_initialPrompt))
+            {
+                _initialPrompt = "You are a helpful AI assistant.";
+            }
+            
             _prompt = new Prompt(_chatbotName, _initialPrompt);
             _reqHeaders = new List<(string, string)>
             { 
                 ("Authorization", $"Bearer {Credentials.OpenAI_ApiKey}"),
                 ("Content-Type", "application/json")
             };
-            switch (_model) {
-                case Model.ChatGPT:
-                    _selectedModel = null;
-                    break;
-                case Model.Davinci:
-                    _selectedModel = "text-davinci-003";
-                    break;
-                case Model.Curie:
-                    _selectedModel = "text-curie-001";
-                    break;
-            }
         }
 
         public void SendToChatGPT(string message)
         {
-            if (_selectedModel != null) {
-                _lastUserMsg = message;
-                _prompt.AppendText(Prompt.Speaker.User, message);
-                ChatGPTReq reqObj = new ChatGPTReq();
-                reqObj.model = _selectedModel;
-                reqObj.prompt = _prompt.CurrentPrompt;
-                reqObj.max_tokens = _maxTokens;
-                reqObj.temperature = _temperature;
-                string json = JsonUtility.ToJson(reqObj);
-                StartCoroutine(requests.PostReq<ChatGPTRes>(_uri, json, ResolveResponse, _reqHeaders));
-            } else {
-                Debug.LogError
-                (
-                    "It looks like you haven't setup the model name for ChatGPT's API."
-                    + " Either select a different model, or add ChatGPT's model name in ChatGPTConversation's OnEnable()" 
-                );
+            _lastUserMsg = message;
+            _prompt.AppendText(Prompt.Speaker.User, message);
+
+            // Responses API Request
+            ResponsesReq reqObj = new ResponsesReq();
+            reqObj.model = _model;
+            reqObj.input = message;
+            
+            // Only include instructions if not empty
+            if (!string.IsNullOrEmpty(_prompt.Instructions))
+            {
+                reqObj.instructions = _prompt.Instructions;
             }
+
+            // Use Newtonsoft.Json to properly serialize with null value handling
+            var settings = new JsonSerializerSettings 
+            { 
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
+            string json = JsonConvert.SerializeObject(reqObj, settings);
+            Debug.Log("Sending to Responses API: " + json);
+            
+            StartCoroutine(requests.PostReq<ResponsesRes>(_uri, json, ResolveResponsesResponse, _reqHeaders));
         }
 
-        private void ResolveResponse(ChatGPTRes res)
+        private void ResolveResponsesResponse(ResponsesRes res)
         {
-            _lastChatGPTMsg = res.choices[0].text
-                .TrimStart('\n')
-                .Replace("<|im_end|>", "");
+            // Extract text from output array
+            if (res.output != null && res.output.Count > 0)
+            {
+                string allText = "";
+                foreach (var outputMsg in res.output)
+                {
+                    if (outputMsg.role == "assistant" && outputMsg.content != null)
+                    {
+                        foreach (var contentItem in outputMsg.content)
+                        {
+                            if (contentItem.type == "output_text" && !string.IsNullOrEmpty(contentItem.text))
+                            {
+                                allText += contentItem.text;
+                            }
+                        }
+                    }
+                }
+                _lastChatGPTMsg = allText;
+            }
+            else
+            {
+                _lastChatGPTMsg = "No response from API";
+            }
+
+            Debug.Log("ChatGPT Response: " + _lastChatGPTMsg);
             _prompt.AppendText(Prompt.Speaker.ChatGPT, _lastChatGPTMsg);
             Manager._OnChatGPTResponse.Invoke(_lastChatGPTMsg);
         }

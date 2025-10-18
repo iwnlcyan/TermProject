@@ -3,8 +3,6 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
@@ -35,6 +33,7 @@ public class Manager : MonoBehaviour
 
     private void SSTResponse_OK(string value)
     {
+        isRecording = false;
         outputText.text += "<color=\"grey\">User: " + value + "</color>\n";
         if (!chatGPT_Enabled)
         {
@@ -49,6 +48,7 @@ public class Manager : MonoBehaviour
     }
     private void SSTResponse_ERROR(string value)
     {
+        isRecording = false;
         outputText.text += value + "\n";
         stt_Enabled = true;
         imageOutputPanel.color = UnityEngine.Color.black;
@@ -92,15 +92,31 @@ public class Manager : MonoBehaviour
             rt.offsetMin = new Vector2(1100, rt.offsetMin.y);
         }
     }
+    private bool isRecording = false;
+
     private void Update()
     {
         if (Input.GetKeyUp(KeyCode.Space))
         {
             if (stt_Enabled)
             {
-                stt_Enabled = false;
-                stt.ButtonClick();
-                imageOutputPanel.color = UnityEngine.Color.red;
+                if (!isRecording)
+                {
+                    // Start recording
+                    isRecording = true;
+                    stt.ButtonClick();
+                    imageOutputPanel.color = UnityEngine.Color.red;
+                    outputText.text += "<color=\"yellow\">Recording... Press Space again to stop.</color>\n";
+                }
+                else
+                {
+                    // Stop recording and send to API
+                    isRecording = false;
+                    stt_Enabled = false;
+                    stt.ButtonClick();
+                    imageOutputPanel.color = UnityEngine.Color.blue;
+                    outputText.text += "<color=\"cyan\">Processing...</color>\n";
+                }
             }
         }
     }
