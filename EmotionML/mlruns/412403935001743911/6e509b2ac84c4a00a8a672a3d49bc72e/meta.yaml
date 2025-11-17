@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/412403935001743911/6e509b2ac84c4a00a8a672a3d49bc72e/artifacts
+end_time: 1763369769906
+entry_point_name: ''
+experiment_id: '412403935001743911'
+lifecycle_stage: active
+run_id: 6e509b2ac84c4a00a8a672a3d49bc72e
+run_name: polite-fowl-357
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763354954399
+status: 3
+tags: []
+user_id: myungjunlee

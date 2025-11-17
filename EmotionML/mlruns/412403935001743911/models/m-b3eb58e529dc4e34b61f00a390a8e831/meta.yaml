@@ -1,0 +1,10 @@
+artifact_location: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/412403935001743911/models/m-b3eb58e529dc4e34b61f00a390a8e831/artifacts
+creation_timestamp: 1763369765853
+experiment_id: '412403935001743911'
+last_updated_timestamp: 1763369769899
+model_id: m-b3eb58e529dc4e34b61f00a390a8e831
+model_type: null
+name: model
+source_run_id: 6e509b2ac84c4a00a8a672a3d49bc72e
+status: 2
+status_message: null
