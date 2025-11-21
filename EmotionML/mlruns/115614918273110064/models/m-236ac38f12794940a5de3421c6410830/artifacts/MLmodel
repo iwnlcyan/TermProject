@@ -1,0 +1,23 @@
+artifact_path: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/115614918273110064/models/m-236ac38f12794940a5de3421c6410830/artifacts
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.14.0
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.9.1
+mlflow_version: 3.6.0
+model_id: m-236ac38f12794940a5de3421c6410830
+model_size_bytes: 16395567
+model_uuid: m-236ac38f12794940a5de3421c6410830
+prompts: null
+run_id: 6b74324f9a92459cba8ff6fa0b6c7eff
+utc_time_created: '2025-11-21 18:20:50.599930'

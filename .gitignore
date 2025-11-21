@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 # Credentials with API keys
 Assets/Scripts/Credentials.cs
+
+# Data
+EmotionML/data/*

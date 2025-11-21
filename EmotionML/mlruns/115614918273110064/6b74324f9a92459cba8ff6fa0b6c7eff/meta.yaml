@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/115614918273110064/6b74324f9a92459cba8ff6fa0b6c7eff/artifacts
+end_time: 1763749254860
+entry_point_name: ''
+experiment_id: '115614918273110064'
+lifecycle_stage: active
+run_id: 6b74324f9a92459cba8ff6fa0b6c7eff
+run_name: beautiful-dog-403
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763746853880
+status: 3
+tags: []
+user_id: myungjunlee

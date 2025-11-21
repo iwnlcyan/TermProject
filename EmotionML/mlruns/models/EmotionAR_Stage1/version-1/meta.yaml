@@ -1,0 +1,15 @@
+creation_timestamp: 1763749947234
+current_stage: None
+deployment_job_state: null
+description: ''
+last_updated_timestamp: 1763749947234
+model_id: m-236ac38f12794940a5de3421c6410830
+name: EmotionAR_Stage1
+run_id: 6b74324f9a92459cba8ff6fa0b6c7eff
+run_link: ''
+source: models:/m-236ac38f12794940a5de3421c6410830
+status: READY
+status_message: null
+storage_location: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/115614918273110064/models/m-236ac38f12794940a5de3421c6410830/artifacts
+user_id: null
+version: 1

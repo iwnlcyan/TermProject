@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/myungjunlee/Library/Mobile Documents/com~apple~CloudDocs/Desktop/TermProject/EmotionML/mlruns/964804641498052919/d2d38e59244b4bbb99d51198b7795782/artifacts
+end_time: 1763751000363
+entry_point_name: ''
+experiment_id: '964804641498052919'
+lifecycle_stage: active
+run_id: d2d38e59244b4bbb99d51198b7795782
+run_name: classy-shad-610
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763750907003
+status: 3
+tags: []
+user_id: myungjunlee
