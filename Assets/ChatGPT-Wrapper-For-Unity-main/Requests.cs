@@ -76,13 +76,13 @@ namespace ChatGPTWrapper
                 case UnityWebRequest.Result.ConnectionError:
                 case UnityWebRequest.Result.DataProcessingError:
                     Debug.LogError("Error: " + webRequest.error);
-                    Manager._OnChatGPTError(webRequest.error);
+                    ExManager._OnChatGPTError(webRequest.error);
                     break;
                 case UnityWebRequest.Result.ProtocolError:
                     Debug.LogError(": HTTP Error: " + webRequest.error);
                     Debug.LogError("Response Body: " + webRequest.downloadHandler.text);
                     Debug.LogError("Request URL: " + webRequest.url);
-                    Manager._OnChatGPTError(webRequest.error);
+                    ExManager._OnChatGPTError(webRequest.error);
                     break;
                 case UnityWebRequest.Result.Success:
                     var responseJson = JsonUtility.FromJson<T>(webRequest.downloadHandler.text);

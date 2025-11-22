@@ -182,12 +182,12 @@ public class STT : MonoBehaviour
         if (isRecognizedSpeech_OK)
         {
             isRecognizedSpeech_OK = false;
-            Manager._OnSSTResponse_OK(message);
+            ExManager._OnSSTResponse_OK(message);
         }
         if (isRecognizedSpeech_Error)
         {
             isRecognizedSpeech_Error = false;
-            Manager._OnSSTResponse_ERROR(message);
+            ExManager._OnSSTResponse_ERROR(message);
         }
     }
 

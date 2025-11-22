@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
-public class Manager : MonoBehaviour
+public class ExManager : MonoBehaviour
 {
     public UnityEngine.UI.Image imageOutputPanel;
     public TMPro.TextMeshProUGUI outputText;

@@ -122,7 +122,7 @@ namespace ChatGPTWrapper {
 
             Debug.Log("ChatGPT Response: " + _lastChatGPTMsg);
             _prompt.AppendText(Prompt.Speaker.ChatGPT, _lastChatGPTMsg);
-            Manager._OnChatGPTResponse.Invoke(_lastChatGPTMsg);
+            ExManager._OnChatGPTResponse.Invoke(_lastChatGPTMsg);
         }
     }
 }

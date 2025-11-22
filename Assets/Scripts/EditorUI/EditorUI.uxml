@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/EditorUI/EditorUI.uss?fileID=7433441132597879392&amp;guid=3c137b3a88b0e6a47ac3e24e36d730f0&amp;type=3#EditorUI" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" name="ScrollView" style="padding-left: 5px;">
+        <ui:VisualElement style="flex-grow: 1; padding-top: 10px;">
+            <ui:Button text="Start / Stop / Continue" parse-escape-sequences="true" display-tooltip-when-elided="true" name="StartStopButton" style="-unity-font-style: bold; padding-top: 10px; padding-bottom: 10px; font-size: 16px;" />
+            <ui:Button text="Recenter HMD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RecenterXR" enable-rich-text="true" style="padding-top: 4px; padding-bottom: 4px;" />
+            <ui:TextField picking-mode="Ignore" label="User ID" name="UserID" style="-unity-font-style: bold; color: rgb(192, 0, 0); margin-top: 5px;" />
+            <ui:DropdownField label="Level Select" index="-1" name="LevelSelect" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; padding-top: 10px;">
+            <ui:Label tabindex="-1" text="Info" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold;" />
+            <ui:ProgressBar value="0" title="Anger" name="Anger" high-value="1" />
+            <ui:ProgressBar value="0" title="Disgust" name="Disgust" high-value="1" />
+            <ui:ProgressBar value="0" title="Fear" name="Fear" high-value="1" />
+            <ui:ProgressBar value="0" title="Happiness" name="Happiness" high-value="1" />
+            <ui:ProgressBar value="0" title="Neutral" name="Neutral" high-value="1" />
+            <ui:ProgressBar value="0" title="Sadness" name="Sadness" high-value="1" />
+            <ui:ProgressBar value="0" title="Surprise" name="Surprise" high-value="1" />
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 5px;">
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="Pending REST responses:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" style="flex-shrink: 1;" />
+                    <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PendingRestResponses" style="min-width: 20px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="Total REST calls:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" style="flex-shrink: 1;" />
+                    <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TotalRestCalls" style="min-width: 20px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="REST FPS:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" style="flex-shrink: 1;" />
+                    <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PostsFPS" style="min-width: 20px; -unity-text-align: upper-right;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="Snapshot FPS:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" />
+                    <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SnapshotFPS" style="min-width: 20px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                <ui:Label tabindex="-1" text="Snapshot writing:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" style="flex-shrink: 1; min-width: auto;" />
+                <ui:ProgressBar value="0" name="ImageSaveProgress" high-value="0" style="flex-grow: 1;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; padding-top: 10px; padding-bottom: 5px;">
+            <ui:Label tabindex="-1" text="Settings" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold;" />
+            <ui:DropdownField label="Webcam" index="0" name="WebcamDropdown" />
+            <ui:DropdownField label="Secondary Webcam" index="0" name="SecondaryWebcamDropdown" />
+            <ui:TextField picking-mode="Ignore" label="REST basepath" value="http://localhost:8765/" name="RestBasePath" />
+            <ui:Label tabindex="-1" text="Further settings can be found within the MANAGERS GameObjects." parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: italic; padding-top: 6px; padding-left: 4px; font-size: 9px; -unity-text-align: upper-left;" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Webcams" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold; margin-bottom: 4px;" />
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; flex-wrap: wrap;">
+                <ui:VisualElement name="WebcamTexture1" class="webcam" style="background-image: url(&apos;project://database/Assets/Textures/WebcamTexture%201.renderTexture?fileID=8400000&amp;guid=61408ff309c53d9448e4cb6b4a8f6433&amp;type=2#WebcamTexture 1&apos;);" />
+                <ui:VisualElement name="WebcamTexture2" class="webcam" style="background-image: url(&apos;project://database/Assets/Textures/WebcamTexture%202.renderTexture?fileID=8400000&amp;guid=b2512dd1d8eb9d749913b85d9f0060de&amp;type=2#WebcamTexture 2&apos;);" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:ScrollView>
+</ui:UXML>
