@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/chanc/HXI/TermProject/EmotionML/mlruns/5/models/m-1e9dfcf1c36649d1bb266ea65d15ce16/artifacts
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.13.5
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.9.1+cu130
+mlflow_version: 3.6.0
+model_id: m-1e9dfcf1c36649d1bb266ea65d15ce16
+model_size_bytes: 16400495
+model_uuid: m-1e9dfcf1c36649d1bb266ea65d15ce16
+prompts: null
+run_id: 6882016db1954fb1a70d73a8d70c57ef
+utc_time_created: '2025-11-23 06:00:47.579405'
