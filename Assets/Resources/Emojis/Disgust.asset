@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 600e8b54b36f36b4aae8ed1fde4f78dd, type: 3}
+  m_Name: Disgust
+  m_EditorClassIdentifier: 
+  EEmote: 3
+  EnglishName: Disgust
+  GermanName: Angeekelt
+  Textures:
+  - {fileID: 2800000, guid: 0db645599f01caa489fb329d1d9f8399, type: 3}
+  - {fileID: 2800000, guid: 34ac665024b2674459d0de794fcb3e74, type: 3}

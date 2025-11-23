@@ -65,7 +65,7 @@ namespace EditorUI
 
             _root.Q<Button>("StartStopButton").RegisterCallback<ClickEvent>(OnStartStopButtonClicked);
             _root.Q<Button>("RecenterXR").RegisterCallback<ClickEvent>(OnRecenterXRButtonClicked);
-            
+
             _imageProgressBar = _root.Q<ProgressBar>("ImageSaveProgress");
 
             if (EditorUIFerStats.Instance != null)
@@ -76,10 +76,19 @@ namespace EditorUI
                 _root.Q<Label>("TotalRestCalls").BindProperty(ferStats.FindProperty("TotalPosts"));
                 _root.Q<Label>("SnapshotFPS").BindProperty(ferStats.FindProperty("SnapshotFPS"));
             }
-            
+
             CreateWebcamDropdown();
             CreateSecondaryWebcamDropdown();
-            CreateLevelDropdown();
+
+
+            SelectedLevel = "Level 1";   // <-- put your actual level name here
+
+            // Load the ScriptableLevel directly
+            var fixedLevel = Resources.Load<ScriptableLevel>("Levels/" + SelectedLevel);
+
+            // Tell GameManager immediately
+            if (GameManager.Instance != null)
+                GameManager.Instance.SetNewLevel(fixedLevel);
         }
 
         private static void OnStartStopButtonClicked(ClickEvent evt)
@@ -89,28 +98,28 @@ namespace EditorUI
             else
                 GameManager.Instance.OnButtonPressed(UIType.StartStopLevel);
         }
-        
+
         private static void OnRecenterXRButtonClicked(ClickEvent evt)
         {
             GameManager.Instance.RecenterXR();
         }
 
-        private void CreateLevelDropdown()
-        {
-            _levels =  Resources.LoadAll<ScriptableLevel>("Levels").ToList();
+        //private void CreateLevelDropdown()
+        //{
+        //    _levels =  Resources.LoadAll<ScriptableLevel>("Levels").ToList();
 
-            DropdownField dropdown = _root.Q<DropdownField>("LevelSelect");
-            foreach (ScriptableLevel level in _levels)
-            {
-                dropdown.choices.Add(level.name);
-            }
-            dropdown.index = _levels.IndexOf(_levels.FirstOrDefault(l => l.name == SelectedLevel));
-            dropdown.RegisterValueChangedCallback(evt =>
-            {
-                SelectedLevel = evt.newValue;
-                if (GameManager.Instance != null) GameManager.Instance.SetNewLevel(_levels.FirstOrDefault(l => l.name == SelectedLevel));
-            });
-        }
+        //    DropdownField dropdown = _root.Q<DropdownField>("LevelSelect");
+        //    foreach (ScriptableLevel level in _levels)
+        //    {
+        //        dropdown.choices.Add(level.name);
+        //    }
+        //    dropdown.index = _levels.IndexOf(_levels.FirstOrDefault(l => l.name == SelectedLevel));
+        //    dropdown.RegisterValueChangedCallback(evt =>
+        //    {
+        //        SelectedLevel = evt.newValue;
+        //        if (GameManager.Instance != null) GameManager.Instance.SetNewLevel(_levels.FirstOrDefault(l => l.name == SelectedLevel));
+        //    });
+        //}
 
         private void CreateWebcamDropdown()
         {
@@ -169,7 +178,7 @@ namespace EditorUI
         public void SetNewLevel(ScriptableLevel level)
         {
             SelectedLevel = level.name;
-            CreateLevelDropdown();
+            //CreateLevelDropdown();
         }
 
         public void UpdateImageProgress(int value)
