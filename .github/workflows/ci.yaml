@@ -30,4 +30,4 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - run: echo "Deploy placeholder; add real deployment steps here."
+      - run: echo "Add real deployment steps here, it's just a test."
