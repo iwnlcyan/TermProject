@@ -1,0 +1,10 @@
+hsemotion-onnx==0.3.1
+mediapipe==0.10.11
+
+numpy~=1.25.2
+onnxruntime~=1.15.1
+opencv-python~=4.8.0.76
+
+fastapi~= 0.103.1
+python-multipart~=0.0.6
+uvicorn~=0.23.2
