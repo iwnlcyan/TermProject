@@ -7,6 +7,8 @@ using System.IO;
 
 public class STT : MonoBehaviour
 {
+    public Emotion2Context EmotionContext;
+
     private object threadLocker = new object();
     private string message;
 
@@ -182,14 +184,23 @@ public class STT : MonoBehaviour
         if (isRecognizedSpeech_OK)
         {
             isRecognizedSpeech_OK = false;
-            ExManager._OnSSTResponse_OK(message);
+
+            // Prepend or append emotion to the recognized speech
+            string messageWithEmotion = string.IsNullOrEmpty(EmotionContext.CurrentEmotion.ToString())
+                ? message
+                : $"[{EmotionContext.CurrentEmotion}] {message}";
+
+            // Send it to AI/ExManager
+            ExManager._OnSSTResponse_OK(messageWithEmotion);
         }
+
         if (isRecognizedSpeech_Error)
         {
             isRecognizedSpeech_Error = false;
             ExManager._OnSSTResponse_ERROR(message);
         }
     }
+
 
     [System.Serializable]
     private class WhisperResponse

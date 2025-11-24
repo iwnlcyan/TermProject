@@ -1,10 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/EditorUI/EditorUI.uss?fileID=7433441132597879392&amp;guid=3c137b3a88b0e6a47ac3e24e36d730f0&amp;type=3#EditorUI" />
-    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" name="ScrollView" style="padding-left: 5px;">
+    <Style src="project://database/Assets/Scripts/EditorUI/EditorUI.uss?fileID=7433441132597879392&amp;guid=3c137b3a88b0e6a47ac3e24e36d730f0&amp;type=3#EditorUI" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" name="ScrollView" style="padding-left: 5px; flex-direction: column-reverse;">
         <ui:VisualElement style="flex-grow: 1; padding-top: 10px;">
             <ui:Button text="Start / Stop / Continue" parse-escape-sequences="true" display-tooltip-when-elided="true" name="StartStopButton" style="-unity-font-style: bold; padding-top: 10px; padding-bottom: 10px; font-size: 16px;" />
             <ui:Button text="Recenter HMD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RecenterXR" enable-rich-text="true" style="padding-top: 4px; padding-bottom: 4px;" />
-            <ui:TextField picking-mode="Ignore" label="User ID" name="UserID" style="-unity-font-style: bold; color: rgb(192, 0, 0); margin-top: 5px;" />
             <ui:DropdownField label="Level Select" index="-1" name="LevelSelect" />
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1; padding-top: 10px;">
@@ -16,7 +15,11 @@
             <ui:ProgressBar value="0" title="Neutral" name="Neutral" high-value="1" />
             <ui:ProgressBar value="0" title="Sadness" name="Sadness" high-value="1" />
             <ui:ProgressBar value="0" title="Surprise" name="Surprise" high-value="1" />
-            <ui:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 5px;">
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+                <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CurrentWindowEmotion" style="min-width: 20px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);" />
+            <ui:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 5px;">
                 <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
                     <ui:Label tabindex="-1" text="Pending REST responses:" parse-escape-sequences="true" display-tooltip-when-elided="true" class="title" style="flex-shrink: 1;" />
                     <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PendingRestResponses" style="min-width: 20px;" />

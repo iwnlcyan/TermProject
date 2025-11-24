@@ -79,3 +79,7 @@ EmotionML/data/*
 
 # MLflow
 mlruns/
+
+#Fonts (>10MB)
+Assets/Fonts/OpenMoji-Black.ttf
+Assets/Fonts/OpenMoji-Color.ttf

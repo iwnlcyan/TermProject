@@ -10,18 +10,30 @@ using UnityEngine;
 using Utilities;
 
 /// <summary>
-/// Handles the Facial Emotion Recognition (FER) processes, including capturing images, sending them for analysis, and processing the results.
+/// Handles the Facial Emotion Recognition (FER) processes,
+/// including capturing images, sending them for analysis,
+/// and computing the most probable emotion in a time window.
 /// </summary>
 public class FerHandler : MonoBehaviour
 {
     private FaceExpressionHandler _faceExpressionHandler;
-    
-    /// <summary>Flag to determine if facial emotion recognition should be done periodically.</summary>
-    // If true, images are sent for FER processing at regular intervals. If false, images are sent on specific events.
+
     [SerializeField] private bool PeriodicalFerMode = true;
     [SerializeField] private int PeriodicalFPS = 5;
 
-    // Coroutine for continuous facial emotion recognition
+    /// <summary>
+    /// Time window (in seconds) to average predictions over.
+    /// Example: 1.5 seconds = stable FER output
+    /// </summary>
+    [SerializeField] private float FerWindowSeconds = 1.5f;
+
+    // Where we store recent FER outputs
+    private readonly List<(float time, Probabilities probs)> _ferWindow =
+        new List<(float time, Probabilities probs)>();
+
+    [SerializeField] public EEmote CurrentWindowEmotion { get; private set; } = EEmote.Neutral;
+
+    // Coroutine reference
     private Coroutine _coroutine;
 
     private void Start()
@@ -34,138 +46,146 @@ public class FerHandler : MonoBehaviour
     {
         EventManager.OnEmoteEnteredActionArea -= EmoteEnteredActionAreaCallback;
     }
-    
-    // Callback for when an emote enters the action area, triggers the facial emotion recognition
+
     private void EmoteEnteredActionAreaCallback(Emoji emoji) => SendRestImage();
 
-    /// <summary>
-    /// Initiates the sending of REST images for FER processing.
-    /// </summary>
     private void SendRestImage()
-    {        
+    {
         if (!PeriodicalFerMode)
-            StartCoroutine(PostRestImage());    // Send a single image for FER processing.
+            StartCoroutine(PostRestImage());
         else if (_coroutine == null)
-            _coroutine = StartCoroutine(SendRestImageContinuous());     // Start the continuous image sending process.
+            _coroutine = StartCoroutine(SendRestImageContinuous());
     }
-    
-    /// <summary>
-    /// Coroutine for continuously sending images at a specified interval for FER processing.
-    /// </summary>
+
     private IEnumerator SendRestImageContinuous()
     {
-        // Wait until the end of frame to ensure all events are processed and EmojisAreInActionArea is true
         yield return new WaitForEndOfFrame();
 
-        // Interval between each image sent for FER processing.
         float interval = 1f / PeriodicalFPS;
         float nextPostTime = Time.realtimeSinceStartup + interval;
-        
+
         while (PeriodicalFerMode && GameManager.Instance.LevelProgress.EmojisAreInActionArea)
         {
-            // Log a new FER request.
             EditorUIFerStats.Instance.LogNewRestRequest();
-            
-            // Send an image for FER processing.
             StartCoroutine(PostRestImage());
 
-            // Calculate time needed to wait to ensure periodic execution
-            float waitTime = Math.Max(nextPostTime - Time.realtimeSinceStartup, 0);
+            float waitTime = Mathf.Max(nextPostTime - Time.realtimeSinceStartup, 0);
             yield return new WaitForSecondsRealtime(waitTime);
 
-            // iterate timer to next interval
             nextPostTime += interval;
         }
-        
+
         _coroutine = null;
     }
 
-    /// <summary>
-    /// Captures a webcam frame, converts it to base64, and sends it for FER processing.
-    /// </summary>
     private IEnumerator PostRestImage()
     {
         Snapshot snapshot = WebcamManager.GetSnapshot();
-        
+
         while (snapshot == null)
         {
             yield return null;
             snapshot = WebcamManager.GetSnapshot();
         }
-        
-        // Initialize log data for the current FER process.
+
         LogData logData = new()
         {
             Timestamp = snapshot.Timestamp,
             LevelID = GameManager.Instance.Level.LevelName,
             Emoji = GameManager.Instance.LevelProgress.GetEmojiInActionArea,
             UserID = EditorUI.EditorUI.Instance.UserID,
-            FaceExpressions = LoggingSystem.Instance.LogFaceExpressions? _faceExpressionHandler.GetFaceExpressionsAsJson() : null
+            FaceExpressions = LoggingSystem.Instance.LogFaceExpressions
+                ? _faceExpressionHandler.GetFaceExpressionsAsJson()
+                : null
         };
-        
-        // Convert the captured image to base64 format.
-        string image = WebcamManager.GetBase64(snapshot);
-        yield return null;  // Wait until the next frame to reduce lag
 
-        // Send the base64 image for FER processing.
+        string image = WebcamManager.GetBase64(snapshot);
+        yield return null;
+
         Rest.PostBase64(image, logData, this);
     }
-    
-    /// <summary>
-    /// Processes the REST response from the FER API.
-    /// </summary>
-    /// <param name="response">The JSON response from the FER service.</param>
-    /// <param name="logData">The log data associated with the current FER process.</param>
+
+    // ----------------------------------------------------------------------
+    // NEW: Time-window FER aggregation
+    // ----------------------------------------------------------------------
+
     public void ProcessRestResponse(string response, LogData logData)
     {
-        // Parse the JSON response to get FER probabilities.
-        logData.FerProbabilities = JsonUtility.FromJson<Probabilities>(response);
-        // Determine the emotion with the highest probability.
-        logData.EmoteFer = GetEmoteWithHighestProbability(logData.FerProbabilities);
-        // Trigger an event for the detected emotion.
+        Probabilities probs = JsonUtility.FromJson<Probabilities>(response);
+        logData.FerProbabilities = probs;
+
+        // Add current result to window
+        float now = Time.realtimeSinceStartup;
+        _ferWindow.Add((now, probs));
+
+        // Remove predictions older than window length
+        _ferWindow.RemoveAll(entry => now - entry.time > FerWindowSeconds);
+
+        // Compute aggregated prediction
+        Probabilities averaged = ComputeAverageProbabilities();
+        logData.EmoteFer = GetEmoteWithHighestProbability(averaged);
+        CurrentWindowEmotion = logData.EmoteFer;   // <--- update the public variable
+
+
+        // Fire event based on window-averaged emotion
         EventManager.InvokeEmotionDetected(logData.EmoteFer);
-        
+
         HandleFerCompletion(logData);
     }
 
-    /// <summary>
-    /// Handles errors that occur during the REST call for FER processing.
-    /// </summary>
-    /// <param name="error">The exception thrown during the REST call.</param>
-    /// <param name="logData">The log data associated with the current FER process.</param>
     public void ProcessRestError(Exception error, LogData logData)
     {
-        // Log the error message.
         Debug.LogWarning("REST Error: " + error.Message);
-        
-        // Set FER probabilities to default (zero) values.
         logData.FerProbabilities = new Probabilities();
-        
         HandleFerCompletion(logData);
+    }
+
+    private Probabilities ComputeAverageProbabilities()
+    {
+        if (_ferWindow.Count == 0)
+            return new Probabilities();
+
+        float anger = 0, disgust = 0, fear = 0, happiness = 0, neutral = 0, sadness = 0, surprise = 0;
+
+        foreach (var entry in _ferWindow)
+        {
+            anger += entry.probs.anger;
+            disgust += entry.probs.disgust;
+            fear += entry.probs.fear;
+            happiness += entry.probs.happiness;
+            neutral += entry.probs.neutral;
+            sadness += entry.probs.sadness;
+            surprise += entry.probs.surprise;
+        }
+
+        float count = _ferWindow.Count;
+
+        return new Probabilities
+        {
+            anger = anger / count,
+            disgust = disgust / count,
+            fear = fear / count,
+            happiness = happiness / count,
+            neutral = neutral / count,
+            sadness = sadness / count,
+            surprise = surprise / count
+        };
     }
 
     private void HandleFerCompletion(LogData logData)
     {
-        // Log the FER results if it is not of type Training.
-        if (LoggingSystem.Instance.LogTrainingLevel || GameManager.Instance.Level.LevelMode != ELevelMode.Training)
+        if (LoggingSystem.Instance.LogTrainingLevel ||
+            GameManager.Instance.Level.LevelMode != ELevelMode.Training)
             LoggingSystem.Instance.AddToLogDataList(logData);
-        
-        // Update the UI with the FER results.
+
         EditorUIFerStats.Instance.LogRestResponse(logData);
 
-        // If emojis are still in the action area, continue the FER process.
         if (GameManager.Instance.LevelProgress.EmojisAreInActionArea)
             SendRestImage();
     }
-    
-    /// <summary>
-    /// Determines the emotion with the highest probability from the FER results.
-    /// </summary>
-    /// <param name="probabilities">The FER probabilities for each emotion.</param>
-    /// <returns>The emotion with the highest probability.</returns>
+
     private static EEmote GetEmoteWithHighestProbability(Probabilities probabilities)
     {
-        // Map each emotion to its probability.
         Dictionary<EEmote, float> result = new()
         {
             { EEmote.Anger, probabilities.anger },
@@ -177,8 +197,8 @@ public class FerHandler : MonoBehaviour
             { EEmote.Surprise, probabilities.surprise }
         };
 
-        // Return the emotion with the highest probability.
         return result.OrderByDescending(kv => kv.Value).First().Key;
     }
 }
+
 
