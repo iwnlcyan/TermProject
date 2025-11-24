@@ -24,6 +24,7 @@ namespace EditorUI
         [SerializeField] public string SelectedLevel;
         [SerializeField] public string RestBasePath;
         [SerializeField] public string UserID;
+        [SerializeField] public EEmote CurrentWindowEmotion;
         private List<ScriptableLevel> _levels;
 
 
@@ -192,6 +193,17 @@ namespace EditorUI
             _imageProgressBar.highValue = value;
             _imageProgressBar.title = $"{_imageProgressBar.value} / {_imageProgressBar.highValue}";
         }
+
+        public void UpdateCurrentEmotion(EEmote newEmotion)
+        {
+            CurrentWindowEmotion = newEmotion;
+
+            // Optionally, update a label in the UI if you want to display it
+            var label = _root?.Q<Label>("CurrentWindowEmotion");
+            if (label != null)
+                label.text = "Emotion in Current Time Window: " + newEmotion.ToString();
+        }
+
     }
 }
 #endif
