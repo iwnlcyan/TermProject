@@ -1,0 +1,14 @@
+  on: [push, pull_request]
+  jobs:
+    lint-test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+        - run: pip install -r requirements-dev.txt
+        - run: pytest
+    deploy:
+      needs: lint-test
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
