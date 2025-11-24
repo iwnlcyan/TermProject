@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Shader Graphs_AreaShaderURP
-  m_Shader: {fileID: -6465566751694194690, guid: 598c5a9601a954f43bb7643b1e0593db, type: 3}
+  m_Shader: {fileID: 4800000, guid: 30b77fe21065aab4082b63ff03a9670e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -46,6 +46,7 @@ Material:
     - _Spread: 0.5
     m_Colors:
     - _BottomColor: {r: 1, g: 0.4, b: 0, a: 0.19607843}
+    - _Color: {r: 1, g: 1, b: 1, a: 0}
     - _TopColor: {r: 1, g: 0.40000004, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &9027059645522245206
