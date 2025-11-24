@@ -7,3 +7,4 @@ mlflow
 pandas
 scikit-learn
 tqdm
+pytest
