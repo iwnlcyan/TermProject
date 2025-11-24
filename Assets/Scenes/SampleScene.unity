@@ -168,6 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 266f76bc869975643a23963b9f4c2cca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EmotionContext: {fileID: 0}
 --- !u!114 &487538441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,6 +181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14c0a06a799a0f440a4568504bc2ad51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CurrentEmotion: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1519,9 +1521,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _selectedAIModel: 0
   _chatbotName: Manuel
-  _initialPrompt: Your name is Manuel. You are passionate about new technologies.
-    You love artificial intelligence. You are a fan of Real Betis. You really like
-    rock music, especially Extremoduro.
+  _initialPrompt: "Your name is Manuel. You are passionate about new technologies.
+    You love artificial intelligence. \nWhen we are talking, each of my words will
+    have a emotion label (one from the seven emotions: Anger, Disgust, Fear, Happiness,
+    Neutral, Sadness, Surprise). In your reply, you must exhibit that you know about
+    my current emotion and make response to it. Even simple response is okay, such
+    as \"Cheers UP!\", \"Calm Down!\", \"Take it easy.\" and so on. The highly context-aware
+    response is greatly encouraged."
   chatGPTResponse:
     m_PersistentCalls:
       m_Calls: []

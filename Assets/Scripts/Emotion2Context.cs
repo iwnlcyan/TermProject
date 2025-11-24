@@ -1,3 +1,4 @@
+using Enums;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,8 @@ using UnityEngine;
 public class Emotion2Context : MonoBehaviour
 {
     private FerHandler _ferHandler;
+    public EEmote CurrentEmotion;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,8 +19,8 @@ public class Emotion2Context : MonoBehaviour
     {
         if (_ferHandler != null)
         {
-            var emotion = _ferHandler.CurrentWindowEmotion;
-            EditorUI.EditorUI.Instance.UpdateCurrentEmotion(emotion);
+            CurrentEmotion = _ferHandler.CurrentWindowEmotion;
+            EditorUI.EditorUI.Instance.UpdateCurrentEmotion(CurrentEmotion);
         }
     }
 }
