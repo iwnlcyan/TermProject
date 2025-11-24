@@ -24,3 +24,10 @@ jobs:
         run: |
           cd EmotionML
           pytest
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - run: echo "Deploy placeholder; add real deployment steps here."
