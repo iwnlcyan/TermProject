@@ -6,7 +6,7 @@ using UnityEngine;
 public class Emotion2Context : MonoBehaviour
 {
     private FerHandler _ferHandler;
-    public EEmote CurrentEmotion;
+    public EEmote CurrentEmotion = EEmote.Neutral;
 
     // Start is called before the first frame update
     void Start()
@@ -20,7 +20,10 @@ public class Emotion2Context : MonoBehaviour
         if (_ferHandler != null)
         {
             CurrentEmotion = _ferHandler.CurrentWindowEmotion;
-            EditorUI.EditorUI.Instance.UpdateCurrentEmotion(CurrentEmotion);
+            if (EditorUI.EditorUI.Instance != null)
+            {
+                EditorUI.EditorUI.Instance.UpdateCurrentEmotion(CurrentEmotion);
+            }
         }
     }
 }
