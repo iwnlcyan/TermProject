@@ -1,8 +1,9 @@
 name: CI
 on:
   push:
-    branches: [master, main, develop]
-  pull_request:
+    paths:
+      - 'EmotionML/**'
+      - '.github/workflows/**'
 
 jobs:
   test:
