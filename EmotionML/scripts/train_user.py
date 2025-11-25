@@ -42,8 +42,8 @@ def _default_export_dir(*parts: str) -> str:
 
 
 def _default_tracking_uri() -> str:
-    """Return an sqlite URI pointing to the repo's mlflow.db."""
-    mlflow_db = PROJECT_DIR.parent / "mlflow.db"
+    """Return an sqlite URI pointing to EmotionML/mlflow.db."""
+    mlflow_db = PROJECT_DIR / "mlflow.db"
     return f"sqlite:///{mlflow_db.resolve().as_posix()}"
 
 

@@ -15,12 +15,14 @@ from src.data_pipeline import get_combined_train_loader, get_dataloaders
 from src.model import create_model
 
 
+DEFAULT_TRACKING_URI = f"sqlite:///{(Path(__file__).resolve().parents[1] / 'mlflow.db').as_posix()}"
+
+
 def train_experiment(params):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    default_tracking = "sqlite:///C:/Users/chanc/HXI/TermProject/mlflow.db"
     tracking_uri = params.get(
-        "tracking_uri", os.getenv("MLFLOW_TRACKING_URI", default_tracking)
+        "tracking_uri", os.getenv("MLFLOW_TRACKING_URI", DEFAULT_TRACKING_URI)
     )
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(
@@ -201,7 +203,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--tracking-uri",
-        default="sqlite:///C:/Users/chanc/HXI/TermProject/mlflow.db",
+        default=DEFAULT_TRACKING_URI,
         help="MLflow tracking URI",
     )
     parser.add_argument(

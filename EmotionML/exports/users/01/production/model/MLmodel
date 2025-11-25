@@ -1,4 +1,4 @@
-artifact_path: file:C:/Users/chanc/HXI/TermProject/EmotionML/mlruns/5/models/m-02ccb5d44cfd419d9578ce48c86e530c/artifacts
+artifact_path: file:C:/Users/chanc/HXI/TermProject/EmotionML/mlruns/3/models/m-9aa9395766bf441aae16948adad28884/artifacts
 flavors:
   python_function:
     config:
@@ -15,9 +15,9 @@ flavors:
     model_data: data
     pytorch_version: 2.9.1+cu130
 mlflow_version: 3.6.0
-model_id: m-02ccb5d44cfd419d9578ce48c86e530c
+model_id: m-9aa9395766bf441aae16948adad28884
 model_size_bytes: 16400495
-model_uuid: m-02ccb5d44cfd419d9578ce48c86e530c
+model_uuid: m-9aa9395766bf441aae16948adad28884
 prompts: null
-run_id: 5d3e24920540459c82e183558ff7a6ed
-utc_time_created: '2025-11-23 06:11:47.588390'
+run_id: b131d2687c8f45ceb9ab60efae4389c3
+utc_time_created: '2025-11-25 05:29:34.060184'

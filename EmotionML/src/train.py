@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from urllib.parse import urlparse
 import mlflow
 from mlflow import pytorch
@@ -13,10 +14,15 @@ from src.data_pipeline import get_dataloaders
 from src.model import create_model
 
 
+DEFAULT_TRACKING_URI = f"sqlite:///{(Path(__file__).resolve().parents[1] / 'mlflow.db').as_posix()}"
+
+
 def train_experiment(params):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tracking_uri = params.get("tracking_uri", os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns"))
+    tracking_uri = params.get(
+        "tracking_uri", os.getenv("MLFLOW_TRACKING_URI", DEFAULT_TRACKING_URI)
+    )
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(params.get("experiment_name", "emojiherovr_efficientnet_b0"))
 
@@ -146,7 +152,7 @@ def train_experiment(params):
 
 if __name__ == "__main__":
     params = {
-        "tracking_uri": "sqlite:///C:/Users/chanc/HXI/TermProject/mlflow.db",
+        "tracking_uri": DEFAULT_TRACKING_URI,
         "data_root": "C:/Users/chanc/HXI/TermProject/EmotionML/data/emoji-hero-vr-db-si",
         "batch_size": 32,
         "lr": 1e-4,
