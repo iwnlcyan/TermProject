@@ -1,0 +1,6 @@
+artifact_location: file:///C:/Users/chanc/HXI/TermProject/EmotionML/mlruns/701379398738946296
+creation_time: 1768954001088
+experiment_id: '701379398738946296'
+last_update_time: 1768954001088
+lifecycle_stage: active
+name: loo_cv_2stage

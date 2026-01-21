@@ -1,0 +1,24 @@
+{
+  "timestamp": "20260120_170641",
+  "mode": "full",
+  "users": {
+    "20": {
+      "stage1_accuracy": 0.8035714285714286,
+      "stage1_f1": 0.8016194331983806,
+      "stage2_accuracy": 0.8928571428571429,
+      "stage2_f1": 0.8884564352056613,
+      "improvement": 0.0892857142857143,
+      "n_samples": 56
+    }
+  },
+  "summary": {
+    "n_users": 1,
+    "mode": "full",
+    "mean_stage1_acc": 0.8035714285714286,
+    "std_stage1_acc": 0.0,
+    "mean_stage2_acc": 0.8928571428571429,
+    "std_stage2_acc": 0.0,
+    "mean_improvement": 0.0892857142857143,
+    "std_improvement": 0.0
+  }
+}

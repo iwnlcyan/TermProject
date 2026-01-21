@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/chanc/HXI/TermProject/EmotionML/mlruns/701379398738946296/c0d49f12e91541c189e6bbf1d4130272/artifacts
+end_time: 1768954726173
+entry_point_name: ''
+experiment_id: '701379398738946296'
+lifecycle_stage: active
+run_id: c0d49f12e91541c189e6bbf1d4130272
+run_name: LOO_User_20_full
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1768954002740
+status: 3
+tags: []
+user_id: chanc
