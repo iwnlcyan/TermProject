@@ -84,3 +84,6 @@ Assets/Fonts/OpenMoji-Color.ttf
 # Papers
 Papers/*
 EmotionAR_IEEE/*
+
+# Zip files
+EmotionML/pre_results.zip

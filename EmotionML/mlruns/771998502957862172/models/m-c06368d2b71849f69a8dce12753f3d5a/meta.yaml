@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/chanc/HXI/EmotionAR/EmotionML/mlruns/771998502957862172/models/m-c06368d2b71849f69a8dce12753f3d5a/artifacts
+creation_timestamp: 1768990496174
+experiment_id: '771998502957862172'
+last_updated_timestamp: 1768990498434
+model_id: m-c06368d2b71849f69a8dce12753f3d5a
+model_type: null
+name: model_stage2
+source_run_id: 20325fa23a394984a9a61ff1d5a667a7
+status: 2
+status_message: null

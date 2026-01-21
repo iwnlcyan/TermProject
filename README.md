@@ -4,26 +4,25 @@
 
 ENSF 619 Term Project | University of Calgary
 
-## 📖 Overview
+## Overview
 
-EmotionAR is a research project addressing facial expression recognition (FER) under HMD (Head-Mounted Display) occlusion for AR/VR applications. We propose a **3-stage personalization pipeline** that adapts emotion recognition models to individual users.
+EmotionAR addresses facial expression recognition (FER) under HMD occlusion for AR/VR applications. We propose a **2-stage personalization pipeline** that adapts emotion recognition models to individual users.
 
 ### Research Questions
 
-- **RQ1**: How can facial expression support personalized VR emotion recognition without biosensors?
-- **RQ2**: Does personalization improve recognition across user differences?
-- **RQ3**: How can SE practices facilitate emotion recognition?
+- **RQ1**: Can FER achieve acceptable accuracy with HMD-occluded faces?
+- **RQ2**: Does personalization fine-tuning improve accuracy over general models?
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        EmotionAR System                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  Unity Application          │  ML Pipeline                      │
-│  ├─ STT (Whisper API)       │  ├─ Stage 0: Base Model           │
-│  ├─ ChatGPT Conversation    │  ├─ Stage 1: Model Reinforcement  │
-│  ├─ TTS (OpenAI TTS)        │  └─ Stage 2: Personalization      │
+│  ├─ STT (Whisper API)       │  ├─ Stage 1: Base Model           │
+│  ├─ ChatGPT Conversation    │  └─ Stage 2: Personalization      │
+│  ├─ TTS (OpenAI TTS)        │                                   │
 │  └─ Avatar Lip Sync         │                                   │
 ├─────────────────────────────────────────────────────────────────┤
 │  MLOps                                                          │
@@ -32,15 +31,14 @@ EmotionAR is a research project addressing facial expression recognition (FER) u
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🧠 ML Pipeline
+## ML Pipeline
 
-### 3-Stage Personalization Strategy
+### 2-Stage Personalization Strategy
 
-| Stage | Description | Purpose |
+| Stage | Description | Details |
 |-------|-------------|---------|
-| **Stage 0** | Base Model | Train EfficientNet-B0 on EmojiHeroVR dataset |
-| **Stage 1** | Model Reinforcement | Fine-tune on combined base + personal data |
-| **Stage 2** | Personal Specialization | Freeze backbone, fine-tune classifier only |
+| **Stage 1** | Base Model | Train EfficientNet-B0 on 28 users (lr=1e-4) |
+| **Stage 2** | Personalize | Fine-tune with Base + Personal data (lr=1e-5) |
 
 ### Dataset: EmojiHeroVR 
 (https://github.com/thorbenortmann/emoji-hero-vr-database)
@@ -49,44 +47,33 @@ EmotionAR is a research project addressing facial expression recognition (FER) u
 |-----------|-------|
 | Total Participants | 37 |
 | Total Images | 3,556 |
-| Emotion Classes | 7 |
-| Training Set | 21 participants |
-| Validation Set | 8 participants |
-| Test Set | 8 participants |
+| Emotion Classes | 7 (Anger, Disgust, Fear, Happiness, Neutral, Sadness, Surprise) |
+| LOO CV Split | 28 Train / 8 Val / 1 Test (per fold) |
+| Personal Data Split | 80% Calibration / 20% Test |
 
 ### Hyperparameters
 
-| Parameter | Value |
-|-----------|-------|
-| Batch Size | 32 |
-| Learning Rate | 1e-4 |
-| Optimizer | Adam |
-| Loss Function | Cross-Entropy |
-| Epochs (Stage 0) | 10 |
-| Epochs (Stage 1, 2) | 2 |
-| Backbone Freezing | EfficientNet backbone frozen in Stage 2 |
+| Parameter | Stage 1 | Stage 2 |
+|-----------|---------|---------|
+| Learning Rate | 1e-4 | 1e-5 |
+| Batch Size | 32 | 32 |
+| Optimizer | Adam | Adam |
 
-### Results
+### Results (LOO CV, N=37)
 
-| Stage | Validation Accuracy | Description |
-|-------|---------------------|-------------|
-| Stage 0 | 69.6% | Base model |
-| Stage 1 | 70.7% | Reinforced model |
-| Stage 2 | **72.7%** | Personalized model |
+| Stage | Accuracy | Description |
+|-------|----------|-------------|
+| Stage 1 (Base) | 71.0% ± 13.8% | General model |
+| Stage 2 (Personalize) | **81.8% ± 9.2%** | +10.8%p improvement |
 
-## 🚀 Features
+## Features
 
 ### Unity Application
-- **STT (Speech-to-Text)**: OpenAI Whisper API
-- **ChatGPT Conversation**: OpenAI Responses API
-- **TTS (Text-to-Speech)**: OpenAI TTS API
-- **Avatar Lip Sync**: Oculus LipSync
+- **STT**: OpenAI Whisper API
+- **Conversation**: OpenAI Responses API
+- **TTS**: OpenAI TTS API
+- **Avatar**: Oculus LipSync
 
 ### MLOps
-- **MLflow**: Model versioning, experiment tracking, model registry for 3-stage pipeline dependency management
-- **GitHub Actions**: Automated CI for model testing on new data arrival
-
-## 👥 Authors
-
-- **Myungjun Lee** (30301722) - mj.lee1@ucalgary.ca
-- **Chuyang Zhang** (30290069) - chuyang.zhang1@ucalgary.ca
+- **MLflow**: Experiment tracking & model registry
+- **GitHub Actions**: CI pipeline

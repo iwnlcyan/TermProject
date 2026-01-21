@@ -147,13 +147,15 @@ def balance_dataset(images, labels, seed=42):
     return list(balanced_images), list(balanced_labels)
 
 
-def create_loo_splits(user_data, leave_out_user, seed=42):
+def create_loo_splits(user_data, leave_out_user, seed=42, personal_test_ratio=0.2):
     """
     Create train/val/test splits for 2-Stage LOO pipeline.
     
     Split: 28 train / 8 val / 1 LOO user (total 37 users)
-    - Stage 1: Train on 28 users, validate on 8 users
-    - Stage 2: Add LOO user data to training (29 users), test on LOO user
+    - Stage 1: Train on 28 users, validate on 8 users, test on LOO user (20% holdout)
+    - Stage 2: Add LOO user calibration data (80%) to training, test on LOO user (20% holdout)
+    
+    NOTE: Personal data is split 80/20 to prevent data leakage between train and test.
     """
     all_users = [u for u in user_data.keys() if u != leave_out_user]
     
@@ -181,22 +183,45 @@ def create_loo_splits(user_data, leave_out_user, seed=42):
             val_images.extend(data['images'])
             val_labels.extend(data['labels'])
     
-    # Balance validation and test sets
+    # Split personal data 80/20 for train/test to prevent data leakage
+    personal_combined = list(zip(personal_images, personal_labels))
+    rng.shuffle(personal_combined)
+    
+    n_test = max(1, int(len(personal_combined) * personal_test_ratio))
+    test_data = personal_combined[:n_test]
+    calibration_data = personal_combined[n_test:]
+    
+    if test_data:
+        test_images_split, test_labels_split = zip(*test_data)
+        test_images_split, test_labels_split = list(test_images_split), list(test_labels_split)
+    else:
+        test_images_split, test_labels_split = [], []
+    
+    if calibration_data:
+        calibration_images, calibration_labels = zip(*calibration_data)
+        calibration_images, calibration_labels = list(calibration_images), list(calibration_labels)
+    else:
+        calibration_images, calibration_labels = [], []
+    
+    # Balance validation set (test set uses all available samples for reliability)
     val_images_balanced, val_labels_balanced = balance_dataset(val_images, val_labels, seed)
-    test_images_balanced, test_labels_balanced = balance_dataset(personal_images, personal_labels, seed)
     
     print(f"  [Split] Train: {len(train_users)} users ({len(train_images)} images)")
     print(f"  [Split] Val: {len(val_users)} users ({len(val_images_balanced)} images, balanced)")
-    print(f"  [Split] Personal (LOO User {leave_out_user}): {len(personal_images)} images")
-    print(f"  [Split] Test: {len(test_images_balanced)} images (balanced)")
+    print(f"  [Split] Personal (LOO User {leave_out_user}): {len(personal_images)} total images")
+    print(f"         └── Calibration (80%): {len(calibration_images)} images (for Stage 2 training)")
+    print(f"         └── Test (20%): {len(test_images_split)} images (held out, never seen during training)")
     
     return {
         'train': {'images': train_images, 'labels': train_labels},
         'val': {'images': val_images_balanced, 'labels': val_labels_balanced},
-        'test': {'images': test_images_balanced, 'labels': test_labels_balanced},
-        'personal': {'images': personal_images, 'labels': personal_labels},
+        'test': {'images': test_images_split, 'labels': test_labels_split},
+        'personal': {'images': calibration_images, 'labels': calibration_labels},  # Now only calibration portion
         'train_users': len(train_users),
         'val_users': len(val_users),
+        'personal_total': len(personal_images),
+        'personal_calibration': len(calibration_images),
+        'personal_test': len(test_images_split),
     }
 
 

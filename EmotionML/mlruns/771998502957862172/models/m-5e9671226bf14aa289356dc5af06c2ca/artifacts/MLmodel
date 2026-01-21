@@ -1,0 +1,35 @@
+artifact_path: file:///C:/Users/chanc/HXI/EmotionAR/EmotionML/mlruns/771998502957862172/models/m-5e9671226bf14aa289356dc5af06c2ca/artifacts
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.13.5
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.9.1+cu130
+is_signature_from_type_hint: false
+mlflow_version: 3.6.0
+model_id: m-5e9671226bf14aa289356dc5af06c2ca
+model_size_bytes: 24263426
+model_uuid: m-5e9671226bf14aa289356dc5af06c2ca
+prompts: null
+run_id: d999bfd3ebe34f8cb837e21ba30f40b3
+saved_input_example_info:
+  artifact_path: input_example.json
+  serving_input_path: serving_input_example.json
+  type: ndarray
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1, 3,
+    224, 224]}}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1,
+    7]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-01-21 14:44:06.375061'
