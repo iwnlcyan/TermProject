@@ -5,13 +5,11 @@ Compares Base Model vs Personalized Model accuracy across users
 
 import json
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 from pathlib import Path
 
 # Set style
 plt.style.use('seaborn-v0_8-whitegrid')
-sns.set_palette("husl")
 
 def load_results(json_path):
     """Load LOO results from JSON file"""
@@ -46,9 +44,10 @@ def create_boxplot(stage1_accs, stage2_accs, output_path):
     # Create box plot
     colors = ['#3498db', '#e74c3c']  # Blue for Base, Red for Personalized
     bp = ax.boxplot([stage1_accs, stage2_accs], 
-                     labels=['Base Model', 'Personalized'],
+                     tick_labels=['Base Model', 'Personalized'],
                      patch_artist=True,
-                     widths=0.6)
+                     widths=0.6,
+                     showfliers=False)
     
     # Color the boxes
     for patch, color in zip(bp['boxes'], colors):

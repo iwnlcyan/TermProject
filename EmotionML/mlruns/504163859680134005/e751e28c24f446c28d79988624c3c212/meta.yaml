@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/hxi-c/Downloads/EmotionML/mlruns/504163859680134005/e751e28c24f446c28d79988624c3c212/artifacts
+end_time: 1769105172784
+entry_point_name: ''
+experiment_id: '504163859680134005'
+lifecycle_stage: active
+run_id: e751e28c24f446c28d79988624c3c212
+run_name: LOO_User_2_compare_all
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769104767025
+status: 3
+tags: []
+user_id: hxi-c

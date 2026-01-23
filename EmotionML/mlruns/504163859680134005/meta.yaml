@@ -1,0 +1,6 @@
+artifact_location: file:///C:/Users/hxi-c/Downloads/EmotionML/mlruns/504163859680134005
+creation_time: 1769104387491
+experiment_id: '504163859680134005'
+last_update_time: 1769104387491
+lifecycle_stage: active
+name: loo_cv_compare_all

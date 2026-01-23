@@ -1,6 +1,6 @@
 # EmotionAR
 
-**Personalized Emotion Recognition in AR via MLOps Pipeline**
+**Personalized Emotion Recognition in AR via 2-Stage Transfer Learning Pipeline**
 
 ENSF 619 Term Project | University of Calgary
 
@@ -8,10 +8,6 @@ ENSF 619 Term Project | University of Calgary
 
 EmotionAR addresses facial expression recognition (FER) under HMD occlusion for AR/VR applications. We propose a **2-stage personalization pipeline** that adapts emotion recognition models to individual users.
 
-### Research Questions
-
-- **RQ1**: Can FER achieve acceptable accuracy with HMD-occluded faces?
-- **RQ2**: Does personalization fine-tuning improve accuracy over general models?
 
 ## System Architecture
 
@@ -21,8 +17,8 @@ EmotionAR addresses facial expression recognition (FER) under HMD occlusion for 
 ├─────────────────────────────────────────────────────────────────┤
 │  Unity Application          │  ML Pipeline                      │
 │  ├─ STT (Whisper API)       │  ├─ Stage 1: Base Model           │
-│  ├─ ChatGPT Conversation    │  └─ Stage 2: Personalization      │
-│  ├─ TTS (OpenAI TTS)        │                                   │
+│  ├─ ChatGPT Conversation    │  └─ Stage 2: User-Specific        │
+│  ├─ TTS (OpenAI TTS)        │       Fine-Tuning                 │
 │  └─ Avatar Lip Sync         │                                   │
 ├─────────────────────────────────────────────────────────────────┤
 │  MLOps                                                          │
@@ -37,34 +33,32 @@ EmotionAR addresses facial expression recognition (FER) under HMD occlusion for 
 
 | Stage | Description | Details |
 |-------|-------------|---------|
-| **Stage 1** | Base Model | Train EfficientNet-B0 on 28 users (lr=1e-4) |
-| **Stage 2** | Personalize | Fine-tune with Base + Personal data (lr=1e-5) |
+| **Stage 1** | Base Model | Train EfficientNet-B0 |
+| **Stage 2** | User-Specific Fine-Tuning | Fine-tune on Base + Personal data |
 
 ### Dataset: EmojiHeroVR 
 (https://github.com/thorbenortmann/emoji-hero-vr-database)
 
-| Attribute | Value |
-|-----------|-------|
-| Total Participants | 37 |
-| Total Images | 3,556 |
-| Emotion Classes | 7 (Anger, Disgust, Fear, Happiness, Neutral, Sadness, Surprise) |
-| LOO CV Split | 28 Train / 8 Val / 1 Test (per fold) |
-| Personal Data Split | 80% Calibration / 20% Test |
 
-### Hyperparameters
+### Training Modes Comparison (Stage 2)
 
-| Parameter | Stage 1 | Stage 2 |
-|-----------|---------|---------|
-| Learning Rate | 1e-4 | 1e-5 |
-| Batch Size | 32 | 32 |
-| Optimizer | Adam | Adam |
+#### Accuracy (LOO CV, N=37, 80/20 split)
 
-### Results (LOO CV, N=37)
+| Mode | Mean Accuracy | Std Dev | Δ from Base |
+|------|---------------|---------|-------------|
+| **Training from Scratch (Retrain)** | **86.4%** | ± 8.2% | **+17.0%p** |
+| Full Layer Fine-tuning | 80.9% | ± 10.3% | +11.5%p |
+| Partial Layer Fine-tuning (Half) | 79.8% | ± 10.3% | +10.4%p |
+| Base Model | 69.4% | ± 16.6% | - |
 
-| Stage | Accuracy | Description |
-|-------|----------|-------------|
-| Stage 1 (Base) | 71.0% ± 13.8% | General model |
-| Stage 2 (Personalize) | **81.8% ± 9.2%** | +10.8%p improvement |
+#### Training Time Comparison
+
+| Mode | Mean Time | Notes |
+|------|-----------|-------|
+| **Base Model Training** | 116.9s ± 23.6s | Stage 1 training time |
+| **Training from Scratch** | 112.8s ± 21.6s | ImageNet → new data |
+| **Full Layer Fine-tuning** | 70.0s ± 9.2s | **~40% time savings** |
+| **Partial Layer Fine-tuning** | 61.0s ± 9.5s | **~46% time savings** |
 
 ## Features
 
@@ -77,3 +71,11 @@ EmotionAR addresses facial expression recognition (FER) under HMD occlusion for 
 ### MLOps
 - **MLflow**: Experiment tracking & model registry
 - **GitHub Actions**: CI pipeline
+
+## Hardware
+
+| Component | Specification |
+|-----------|---------------|
+| **GPU** | NVIDIA RTX 4090 (24GB) |
+| **CPU** | Intel Core i9-14900K |
+| **RAM** | 64GB |
